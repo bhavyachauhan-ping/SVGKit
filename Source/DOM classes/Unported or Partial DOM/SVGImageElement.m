@@ -149,7 +149,7 @@ CGImageRef SVGImageCGImage(UIImage *img)
         
         // If still fail, use the broken image placeholder
         if (!image) {
-            image = SVGKGetBrokenImageRepresentation();
+//            image = SVGKGetBrokenImageRepresentation();
         }
     }
     
