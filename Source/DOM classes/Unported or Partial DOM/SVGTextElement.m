@@ -287,8 +287,10 @@
         }
     }
 
-    NSString* actualOpacity = [self cascadedValueForStylableProperty:@"opacity" inherit:NO];
-    fillLayer.opacity = actualOpacity.length > 0 ? [actualOpacity floatValue] : 1; // unusually, the "opacity" attribute defaults to 1, not 0
+    NSString* opacityAttr = [self getAttribute:@"opacity"];
+    opacityAttr = [(opacityAttr.length > 0 ? opacityAttr : [self cascadedValueForStylableProperty:@"opacity" inherit:NO]) stringByReplacingOccurrencesOfString:@"%" withString:@""];
+    float opacityValue = opacityAttr.length > 0 ? [opacityAttr floatValue] : 1.0;
+    fillLayer.opacity = opacityValue <= 1.0 ? opacityValue : (opacityValue / 100);
 
     return fillLayer;
 }
