@@ -305,8 +305,10 @@
 	{
 		SVGElement<SVGStylable>* stylableElement = (SVGElement<SVGStylable>*) nonStylableElement;
 		
-		NSString* actualOpacity = [stylableElement cascadedValueForStylableProperty:@"opacity" inherit:NO];
-		layer.opacity = actualOpacity.length > 0 ? [actualOpacity floatValue] : 1.0f; // svg's "opacity" defaults to 1!
+        NSString* opacityAttr = [stylableElement getAttribute:@"opacity"];
+        opacityAttr = [(opacityAttr.length > 0 ? opacityAttr : [stylableElement cascadedValueForStylableProperty:@"opacity" inherit:NO]) stringByReplacingOccurrencesOfString:@"%" withString:@""];
+        float opacityValue = opacityAttr.length > 0 ? [opacityAttr floatValue] : 1.0;
+        layer.opacity = opacityValue <= 1.0 ? opacityValue : (opacityValue / 100);
         
         // Apply fill-rule on layer (only CAShapeLayer)
         NSString *fillRule = [stylableElement cascadedValueForStylableProperty:@"fill-rule"];
@@ -527,9 +529,12 @@
 	}
 	CGPathRelease(pathToPlaceInLayer);
 	
-	NSString* actualOpacity = [svgElement cascadedValueForStylableProperty:@"opacity" inherit:NO];
-	fillLayer.opacity = actualOpacity.length > 0 ? [actualOpacity floatValue] : 1; // unusually, the "opacity" attribute defaults to 1, not 0
+    NSString* opacityAttr = [svgElement getAttribute:@"opacity"];
+    opacityAttr = [(opacityAttr.length > 0 ? opacityAttr : [svgElement cascadedValueForStylableProperty:@"opacity" inherit:NO]) stringByReplacingOccurrencesOfString:@"%" withString:@""];
+    float opacityValue = opacityAttr.length > 0 ? [opacityAttr floatValue] : 1.0;
+    fillLayer.opacity = opacityValue <= 1.0 ? opacityValue : (opacityValue / 100);
 
+    
 	if (strokeLayer == fillLayer)
 	{
 		return strokeLayer;

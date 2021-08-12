@@ -221,7 +221,8 @@ CGImageRef SVGImageCGImage(UIImage *img)
     
     NSString* opacityAttr = [self getAttribute:@"opacity"];
     opacityAttr = [(opacityAttr.length > 0 ? opacityAttr : [self cascadedValueForStylableProperty:@"opacity" inherit:NO]) stringByReplacingOccurrencesOfString:@"%" withString:@""];
-    newLayer.opacity = opacityAttr.length > 0 ? ([opacityAttr floatValue] / 100) : 1;
+    float opacityValue = opacityAttr.length > 0 ? [opacityAttr floatValue] : 1.0;
+    newLayer.opacity = opacityValue <= 1.0 ? opacityValue : (opacityValue / 100);
 	
     return newLayer;
 }
