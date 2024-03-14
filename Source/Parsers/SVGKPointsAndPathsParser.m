@@ -1,5 +1,5 @@
 #import "SVGKPointsAndPathsParser.h"
-
+#import "SVGKDefine_Private.h"
 #import "NSCharacterSet+SVGKExtensions.h"
 
 
@@ -312,6 +312,23 @@ static inline CGPoint SVGCurveReflectedControlPoint(SVGCurve prevCurve)
     [SVGKPointsAndPathsParser readCoordinate:scanner intoFloat:&p.y];
     
     return p;
+}
+
+/**
+ flag  (An elliptical arc argument may present 2 flags as 00)
+ ("0"|"1")
+ */
+
++ (BOOL) readFlag:(NSScanner*)scanner
+{
+    if ([scanner scanString:@"0" intoString:NULL]) {
+        return FALSE;
+    }
+    if ([scanner scanString:@"1" intoString:NULL]) {
+        return TRUE;
+    }
+    NSAssert(FALSE, @"invalid flag value");
+    return FALSE;
 }
 
 + (void) readCoordinate:(NSScanner*)scanner intoFloat:(CGFloat*) floatPointer
@@ -728,6 +745,8 @@ static inline CGPoint SVGCurveReflectedControlPoint(SVGCurve prevCurve)
     CGPathAddLineToPoint(path, NULL, coord.x, coord.y);
 
     while (![scanner isAtEnd]) {
+		[SVGKPointsAndPathsParser readCommaAndWhitespace:scanner];
+		
         origin = isRelative ? coord : origin;
         [SVGKPointsAndPathsParser readCoordinate:scanner intoFloat:&xValue];
         horizCoord = CGPointMake(origin.x+xValue, origin.y);
@@ -831,11 +850,12 @@ static inline CGPoint SVGCurveReflectedControlPoint(SVGCurve prevCurve)
 	phi = fmod(phi, 2 * M_PI);
     
     [SVGKPointsAndPathsParser readCommaAndWhitespace:scanner];
-	
-	CGPoint flags = [SVGKPointsAndPathsParser readCoordinatePair:scanner];
-	
-	BOOL largeArcFlag = flags.x != 0.;
-	BOOL sweepFlag = flags.y != 0.;
+
+    BOOL largeArcFlag = [SVGKPointsAndPathsParser readFlag:scanner];
+
+    [SVGKPointsAndPathsParser readCommaAndWhitespace:scanner];
+
+    BOOL sweepFlag = [SVGKPointsAndPathsParser readFlag:scanner];
     
     [SVGKPointsAndPathsParser readCommaAndWhitespace:scanner];
     
